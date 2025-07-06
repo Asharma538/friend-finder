@@ -1,14 +1,15 @@
 package controllers
 
 import (
-	"fmt"
-	"net/http"
-	"errors"
-	"log"
-	"io"
-	"strings"
 	"context"
+	"errors"
+	"fmt"
+	"io"
+	"log"
+	"net/http"
+	"strings"
 	"time"
+
 	"github.com/chromedp/chromedp"
 )
 
@@ -140,3 +141,25 @@ func CheckIfThreadsUserExists(username string) (bool, error) {
 	webpage_string := string(webpage_content)
 	return !strings.Contains(webpage_string, "<title>Threads • Log in</title>"), nil
 }
+
+// func CheckIfFacebookUserExists(username string) (bool, error) {
+// 	facebookURL := fmt.Sprintf("https://www.facebook.com/%s", username)
+// 	response, err := http.Get(facebookURL)
+// 	if err != nil {
+// 		return true, err
+// 	}
+
+// 	defer response.Body.Close()
+// 	if response.StatusCode != http.StatusOK {
+// 		return false, nil
+// 	}
+
+// 	webpage_content, err := io.ReadAll(response.Body)
+// 	if err != nil {
+// 		return true, err
+// 	}
+
+// 	webpage_string := string(webpage_content)
+// 	return !strings.Contains(webpage_string, "This content isn't available right now") &&
+// 		!strings.Contains(webpage_string, "Page Not Found"), nil
+// }
