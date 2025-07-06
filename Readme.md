@@ -19,7 +19,6 @@ A comprehensive username availability checker that works across multiple social 
 - Reddit
 - Pinterest
 - Threads
-- Facebook
 
 ## Installation
 
