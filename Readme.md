@@ -4,12 +4,10 @@ A comprehensive username availability checker that works across multiple social 
 
 ## Features
 
-- 🌐 **Web Interface**: Beautiful, responsive web UI with real-time results
-- 💻 **CLI Interface**: Command-line interface for quick checks
-- ⚡ **Concurrent Checking**: Check all platforms simultaneously for fast results
-- 📊 **Visual Results**: Color-coded cards showing availability status
-- 🔗 **Direct Links**: Quick links to existing profiles when username is taken
-- 📱 **Mobile Friendly**: Responsive design that works on all devices
+- **Web Interface**: Beautiful, responsive web UI with real-time results
+- **CLI Interface**: Command-line interface for quick checks
+- **Concurrent Checking**: Check all platforms simultaneously for fast results
+- **Direct Links**: Quick links to existing profiles when username is taken
 
 ## Supported Platforms
 
@@ -36,34 +34,9 @@ go mod tidy
 
 ## Usage
 
-### Web Interface (Recommended)
-
-Start the web server:
-```bash
-go run main.go server
-```
-
-Then open your browser and navigate to `http://localhost:8080`
-
-The web interface provides:
-- Real-time username checking
-- Visual status indicators
-- Summary statistics
-- Direct links to profiles
-- Mobile-responsive design
-
-### Command Line Interface
-
-For quick command-line checks:
-```bash
-go run main.go
-```
-
-Then enter the username when prompted.
-
 ### Building the Application
 
-To build a standalone executable:
+To build the application:
 ```bash
 go build -o friend-finder.exe
 ```
@@ -76,6 +49,8 @@ Then run:
 # For CLI
 ./friend-finder.exe
 ```
+
+Then enter the username when prompted.
 
 ## API Usage
 
@@ -101,21 +76,14 @@ Response:
     },
     {
       "platform": "Instagram", 
-      "available": false
+      "available": false,
+      "error": "message (if any)"
+    },
+    {
+      ...
     }
   ]
 }
-```
-
-## Configuration
-
-### Environment Variables
-
-- `PORT`: Set the port for the web server (default: 8080)
-
-Example:
-```bash
-PORT=3000 go run main.go server
 ```
 
 ## Project Structure
@@ -127,15 +95,16 @@ friend-finder/
 ├── go.mod                  # Go module dependencies
 ├── go.sum                  # Go module checksums
 ├── models/
-│   ├── platform.go         # Platform struct definition
+│   ├── platform.go         # Platform struct
 │   └── username_checker.go # Username checker logic
 ├── controllers/
-│   └── check_username_controller.go # Platform-specific checkers
+│   └── check_username_controller.go # Checker functions
 ├── handlers/
-│   └── api_handlers.go     # HTTP API handlers
-└── static/
-    ├── index.html          # Web interface
-    └── styles.css          # Additional CSS styles
+│   └── api_handlers.go     # API handlers
+├── static/
+│   ├── index.html          # Web interface
+│   └── styles.css          # CSS styles
+└── vendors/                # Dependencies
 ```
 
 ## How It Works
