@@ -3,48 +3,47 @@ package main
 import (
 	"fmt"
 	"log"
-	"sync"
+	"net/http"
+	"os"
 
-	"github.com/Asharma538/friend-finder/models"
-	"github.com/Asharma538/friend-finder/controllers"
+	"github.com/Asharma538/friend-finder/handlers"
 )
 
 func main() {
-	fmt.Print("Welcome to the Free Username Finder! \n You can check the availability of usernames across multiple platforms at once.\n\n")
-
-	var provided_username string
-	fmt.Print("Enter username: ")
-	fmt.Scanln(&provided_username)
-
-	username_checker := models.UsernameChecker{}
-
-	username_checker.AddPlatform(	"X/Twitter",		controllers.CheckIfXUserExists			)
-	username_checker.AddPlatform(	"GitHub",			controllers.CheckIfGitHubUserExists		)
-	username_checker.AddPlatform(	"Instagram", 		controllers.CheckIfInstagramUserExists	)
-	username_checker.AddPlatform(	"Reddit", 			controllers.CheckIfRedditUserExists		)
-	username_checker.AddPlatform(	"Pinterest", 		controllers.CheckIfPinterestUserExists	)
-	username_checker.AddPlatform(	"Threads", 			controllers.CheckIfThreadsUserExists	)
-
-	wg := &sync.WaitGroup{}
-
-	for _, p := range username_checker.GetPlatforms() {
-		wg.Add(1)
-		go func(p models.Platform) {
-			defer wg.Done()
-			exists, err := p.UsernameChecker(provided_username)
-			if err != nil {
-				log.Fatalf("%s | Error checking username: %v", p.Name, err)
-				return
-			}
-			if exists {
-				log.Printf("%s | Username not available", p.Name)
-				return
-			}
-			log.Printf("%s | Username available", p.Name)
-		}(p)
+	// Determine if running in CLI mode or server mode
+	if len(os.Args) > 1 && os.Args[1] == "server" {
+		startWebServer()
+	} else {
+		startCLI()
 	}
-	wg.Wait()
+}
 
+func startWebServer() {
+	// Serve static files
+	fs := http.FileServer(http.Dir("./static/"))
+	http.Handle("/", fs)
 
-	log.Println("\n\nUsername check completed.")
+	// API endpoints
+	http.HandleFunc("/api/check-username", handlers.CheckUsernameHandler)
+
+	port := "8080"
+	if envPort := os.Getenv("PORT"); envPort != "" {
+		port = envPort
+	}
+
+	fmt.Printf("🚀 Friend Finder server starting on http://localhost:%s\n", port)
+	fmt.Printf("📁 Serving static files from ./static/\n")
+	fmt.Printf("🔍 API endpoint: http://localhost:%s/api/check-username\n", port)
+	fmt.Println("Press Ctrl+C to stop the server")
+
+	log.Fatal(http.ListenAndServe(":"+port, nil))
+}
+
+func startCLI() {
+	fmt.Print("Welcome to the Free Username Finder! \n You can check the availability of usernames across multiple platforms at once.\n\n")
+	fmt.Println("💡 Tip: Run './friend-finder.exe server' to start the web interface!")
+	fmt.Println()
+
+	// Import the CLI functionality
+	runCLI()
 }
