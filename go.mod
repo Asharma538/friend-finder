@@ -2,7 +2,10 @@ module github.com/Asharma538/friend-finder
 
 go 1.24.4
 
-require github.com/chromedp/chromedp v0.13.7
+require (
+	github.com/chromedp/chromedp v0.13.7
+	github.com/joho/godotenv v1.5.1
+)
 
 require (
 	github.com/chromedp/cdproto v0.0.0-20250403032234-65de8f5d025b // indirect

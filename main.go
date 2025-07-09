@@ -6,10 +6,17 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/joho/godotenv"
 	"github.com/Asharma538/friend-finder/handlers"
 )
 
 func main() {
+	// Load environment variables from .env file
+	if err := godotenv.Load(); err != nil {
+		log.Fatalf("Error loading .env file: %v", err)
+		return
+	}
+
 	// Determine if running in CLI mode or server mode
 	if len(os.Args) > 1 && os.Args[1] == "server" {
 		startWebServer()

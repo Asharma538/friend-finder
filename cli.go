@@ -16,6 +16,7 @@ func addAllPlatformsForCLI(u *models.UsernameChecker) {
 	u.AddPlatform("Reddit", controllers.CheckIfRedditUserExists)
 	u.AddPlatform("Pinterest", controllers.CheckIfPinterestUserExists)
 	u.AddPlatform("Threads", controllers.CheckIfThreadsUserExists)
+	u.AddPlatform("LinkedIn", controllers.CheckIfLinkedInUserExists)
 	// u.AddPlatform("Facebook", controllers.CheckIfFacebookUserExists)
 }
 
