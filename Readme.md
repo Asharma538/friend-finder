@@ -17,6 +17,7 @@ A comprehensive username availability checker that works across multiple social 
 - Reddit
 - Pinterest
 - Threads
+- LinkedIn (you'll need to setup a programmable search engine for this to work, https://programmablesearchengine.google.com/about/)
 
 ## Installation
 
