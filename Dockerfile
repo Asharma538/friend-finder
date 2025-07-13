@@ -15,6 +15,7 @@ RUN apt-get update && apt-get install -y \
 
 WORKDIR /app
 COPY --from=builder /app/friend-finder .
+COPY static/ static/
 
 EXPOSE 8080
 
