@@ -12,9 +12,11 @@ import (
 
 func main() {
 	// Load environment variables from .env file
-	if err := godotenv.Load(); err != nil {
-		log.Fatalf("Error loading .env file: %v", err)
-		return
+	if (os.Getenv("ENV") != "prod") {
+		if err := godotenv.Load(); err != nil {
+			log.Fatalf("Error loading .env file: %v", err)
+			return
+		}
 	}
 
 	// Determine if running in CLI mode or server mode

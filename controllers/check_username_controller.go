@@ -93,9 +93,12 @@ func CheckIfXUserExists(username string) (bool, error) {
 		return true, err
 	}
 
+	if strings.Contains(pageContent, "Account suspended") {
+		return true, nil
+	}
 	if strings.Contains(pageContent, "<title>Profile / X</title>") {
 		return false, nil
-	}
+	} 
 
 	return true, nil
 }
@@ -178,10 +181,13 @@ func CheckIfLinkedInUserExists(username string) (bool, error) {
 				if metaTags, exists := pageMap["metatags"].([]any); exists {
 					for _, metaTag := range metaTags {
 						if metaTagMap, ok := metaTag.(map[string]any); ok {
-							if ogURL, exists := metaTagMap["og:url"].(string); exists {
-								if strings.HasSuffix(ogURL, "/in/"+username) {
-									return true, nil
-								}
+							if _, exists := metaTagMap["og:url"].(string); exists {
+								// checking if og:url field exists, not always correct, but 90% accurate
+								return true, nil
+								// // For checking the exact url
+								// if strings.HasSuffix(ogURL, "/in/"+username) {
+								// 	return true, nil
+								// }
 							}
 						}
 					}
