@@ -24,7 +24,7 @@ func CheckIfInstagramUserExists(username string) (bool, error) {
 
 	defer response.Body.Close()
 	if response.StatusCode != http.StatusOK {
-		log.Fatalf("Error: received status code %d for user %s\n", response.StatusCode, username)
+		log.Printf("Error: received status code %d for user %s\n", response.StatusCode, username)
 		return false, errors.New("something went wrong while checking that username, try again in a bit")
 	}
 
@@ -52,33 +52,36 @@ func CheckIfGitHubUserExists(username string) (bool, error) {
 }
 
 func CheckIfRedditUserExists(username string) (bool, error) {
-	redditURL := fmt.Sprintf("https://www.reddit.com/user/%s", username)
-	response, err := http.Get(redditURL)
+	redditURL := fmt.Sprintf("https://www.reddit.com/user/%s/about.json", username)
+	
+	client := &http.Client{}
+	req, err := http.NewRequest("GET", redditURL, nil)
+	if err != nil {
+		return true, err
+	}
+	
+	user_agent_string := fmt.Sprintf("username-checker by /u/%s",os.Getenv("REDDIT_USERNAME"))
+	req.Header.Set("User-Agent", user_agent_string)
+
+	response, err := client.Do(req)
 	if err != nil {
 		return true, err
 	}
 
 	defer response.Body.Close()
-	if response.StatusCode != http.StatusOK {
-		log.Fatalf("Error: received status code %d for user %s\n", response.StatusCode, username)
-		return false, errors.New("something went wrong while checking that username, try again in a bit")
+	if response.StatusCode == 404 {
+		return false, nil
 	}
-
-	webpage_content, err := io.ReadAll(response.Body)
-	if err != nil {
-		return true, err
-	}
-	webpage_string := string(webpage_content)
-	return !strings.Contains(webpage_string, "Sorry"), nil
+	return true, nil
 }
 
 func CheckIfXUserExists(username string) (bool, error) {
-	xURL := fmt.Sprintf("https://twitter.com/%s", username)
+	xURL := fmt.Sprintf("https://x.com/%s", username)
 
 	ctx, cancel := chromedp.NewContext(context.Background())
 	defer cancel()
 
-	ctx, cancel = context.WithTimeout(ctx, 15*time.Second)
+	ctx, cancel = context.WithTimeout(ctx, 30*time.Second)
 	defer cancel()
 
 	var pageContent string
@@ -112,7 +115,7 @@ func CheckIfPinterestUserExists(username string) (bool, error) {
 
 	defer response.Body.Close()
 	if response.StatusCode != http.StatusOK {
-		log.Fatalf("Error: received status code %d for user %s\n", response.StatusCode, username)
+		log.Printf("Error: received status code %d for user %s\n", response.StatusCode, username)
 		return false, errors.New("something went wrong while checking that username, try again in a bit")
 	}
 
@@ -134,7 +137,7 @@ func CheckIfThreadsUserExists(username string) (bool, error) {
 
 	defer response.Body.Close()
 	if response.StatusCode != http.StatusOK {
-		log.Fatalf("Error: received status code %d for user %s\n", response.StatusCode, username)
+		log.Printf("Error: received status code %d for user %s\n", response.StatusCode, username)
 		return false, errors.New("something went wrong while checking that username, try again in a bit")
 	}
 
@@ -151,7 +154,7 @@ func CheckIfLinkedInUserExists(username string) (bool, error) {
 	linkedinURL := fmt.Sprintf("https://www.googleapis.com/customsearch/v1?key=%s&cx=22f7f4f700d6e4f09&q=site:linkedin.com/in/%s", os.Getenv("SEARCH_ENGINE_KEY"), username)
 	response, err := http.Get(linkedinURL)
 	if err != nil {
-		log.Fatalf("Error fetching LinkedIn search results: %v", err)
+		log.Printf("Error fetching LinkedIn search results: %v", err)
 		return true, err
 	}
 
