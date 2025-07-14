@@ -54,35 +54,23 @@ func CheckIfGitHubUserExists(username string) (bool, error) {
 }
 
 func CheckIfRedditUserExists(username string) (bool, error) {
-	redditURL := fmt.Sprintf("https://www.reddit.com/user/%s/about.json", username)
-	req, err := http.NewRequest("GET", redditURL, nil)
+	redditURL := fmt.Sprintf("https://www.reddit.com/api/username_available.json?user=%s", username)
+	req, err := http.Get(redditURL)
 	if err != nil {
-		return true, err
-	}
-
-	req.Header.Set("User-Agent", fmt.Sprintf("username-checker/1.0 by u/%s", redditUsername))
-
-	response, err := http.DefaultClient.Do(req)
-	if err != nil {
-		return true, err
-	}
-	defer response.Body.Close()
-	
-	if response.StatusCode == 404 {
-		return false, nil
-	}
-	if response.StatusCode == http.StatusOK {
 		return true, nil
 	}
 
-	body, err := io.ReadAll(response.Body)
-	if err != nil {
-		log.Printf("Error reading response body: %v", err)
-		return true, err
+	defer req.Body.Close()
+
+	if req.StatusCode == 404 {
+		return true, nil
 	}
 
-	log.Printf("Error: received status code %v for user %s, response: %s", response.StatusCode, username, string(body))
-	return true, errors.New("something went wrong while checking that username")
+	body, err := io.ReadAll(req.Body)
+	if err != nil {
+		return true, err
+	}
+	return string(body) == "false", nil
 }
 
 func CheckIfXUserExists(username string) (bool, error) {
