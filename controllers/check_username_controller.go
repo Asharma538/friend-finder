@@ -26,7 +26,7 @@ func CheckIfInstagramUserExists(username string) (bool, error) {
 
 	defer response.Body.Close()
 	if response.StatusCode != http.StatusOK {
-		log.Printf("Error: received status code %d for user %s\n", response.StatusCode, username)
+		log.Printf("INSTAGRAM | Error: received status code %d for user %s\n", response.StatusCode, username)
 		return false, errors.New("something went wrong while checking that username, try again in a bit")
 	}
 
@@ -43,6 +43,7 @@ func CheckIfGitHubUserExists(username string) (bool, error) {
 	githubURL := fmt.Sprintf("https://www.github.com/%s", username)
 	response, err := http.Get(githubURL)
 	if err != nil {
+		log.Printf("GITHUB | Error fetching user %s: %v\n", username, err)
 		return true, err
 	}
 
@@ -55,19 +56,24 @@ func CheckIfGitHubUserExists(username string) (bool, error) {
 
 func CheckIfRedditUserExists(username string) (bool, error) {
 	redditURL := fmt.Sprintf("https://www.reddit.com/api/username_available.json?user=%s", username)
-	req, err := http.Get(redditURL)
+	req, _ := http.NewRequest("GET", redditURL, nil)
+	req.Header.Set("User-Agent", fmt.Sprintf("username-checker/1.0 (by /%s)", redditUsername))
+	req.Header.Set("Accept", "application/json")
+	client := &http.Client{}
+	resp, err := client.Do(req)
 	if err != nil {
-		return true, nil
+		log.Printf("REDDIT | Error making request for user %s: %v\n", username, err)
+		return true, err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode == 404 {
+		return false, nil
 	}
 
-	defer req.Body.Close()
-
-	if req.StatusCode == 404 {
-		return true, nil
-	}
-
-	body, err := io.ReadAll(req.Body)
+	body, err := io.ReadAll(resp.Body)
 	if err != nil {
+		log.Printf("REDDIT | Error reading response body for user %s: %v\n", username, err)
 		return true, err
 	}
 	return string(body) == "false", nil
@@ -99,6 +105,7 @@ func CheckIfXUserExists(username string) (bool, error) {
 	)
 
 	if err != nil {
+		log.Printf("X/Twitter | Error fetching user %s: %v\n", username, err)
 		return true, err
 	}
 
@@ -116,12 +123,13 @@ func CheckIfPinterestUserExists(username string) (bool, error) {
 	pinterestURL := fmt.Sprintf("https://pinterest.com/%s", username)
 	response, err := http.Get(pinterestURL)
 	if err != nil {
+		log.Printf("PINTEREST | Error fetching user %s: %v\n", username, err)
 		return true, err
 	}
 
 	defer response.Body.Close()
 	if response.StatusCode != http.StatusOK {
-		log.Printf("Error: received status code %d for user %s\n", response.StatusCode, username)
+		log.Printf("PINTEREST | Error: received status code %d for user %s\n", response.StatusCode, username)
 		return false, errors.New("something went wrong while checking that username, try again in a bit")
 	}
 
@@ -138,17 +146,19 @@ func CheckIfThreadsUserExists(username string) (bool, error) {
 	threadsURL := fmt.Sprintf("https://threads.com/@%s", username)
 	response, err := http.Get(threadsURL)
 	if err != nil {
+		log.Printf("THREADS | Error fetching user %s: %v\n", username, err)
 		return true, err
 	}
 
 	defer response.Body.Close()
 	if response.StatusCode != http.StatusOK {
-		log.Printf("Error: received status code %d for user %s\n", response.StatusCode, username)
+		log.Printf("THREADS | Error: received status code %d for user %s\n", response.StatusCode, username)
 		return false, errors.New("something went wrong while checking that username, try again in a bit")
 	}
 
 	webpage_content, err := io.ReadAll(response.Body)
 	if err != nil {
+		log.Printf("THREADS | Error reading response body for user %s: %v\n", username, err)
 		return true, err
 	}
 
@@ -160,13 +170,13 @@ func CheckIfLinkedInUserExists(username string) (bool, error) {
 	linkedinURL := fmt.Sprintf("https://www.googleapis.com/customsearch/v1?key=%s&cx=22f7f4f700d6e4f09&q=site:linkedin.com/in/%s", os.Getenv("SEARCH_ENGINE_KEY"), username)
 	response, err := http.Get(linkedinURL)
 	if err != nil {
-		log.Printf("Error fetching LinkedIn search results: %v", err)
+		log.Printf("LINKEDIN | Error fetching user %s: %v\n", username, err)
 		return true, err
 	}
 
 	defer response.Body.Close()
 	if response.StatusCode != http.StatusOK {
-		log.Printf("Error: received status code %d for user %s\n", response.StatusCode, username)
+		log.Printf("LINKEDIN | Error: received status code %d for user %s\n", response.StatusCode, username)
 		return true, errors.New("something went wrong while checking that username, try again in a bit")
 	}
 
