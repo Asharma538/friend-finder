@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"encoding/json"
+	"log"
 	"net/http"
 	"sync"
 
@@ -41,6 +42,7 @@ func CheckUsernameHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	log.Println("Checking username:", req.Username)
 	// Initialize username checker
 	usernameChecker := models.UsernameChecker{}
 	addAllPlatforms(&usernameChecker)

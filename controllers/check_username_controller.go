@@ -52,36 +52,37 @@ func CheckIfGitHubUserExists(username string) (bool, error) {
 }
 
 func CheckIfRedditUserExists(username string) (bool, error) {
-	redditURL := fmt.Sprintf("https://www.reddit.com/user/%s/about.json", username)
-	
-	client := &http.Client{}
-	req, err := http.NewRequest("GET", redditURL, nil)
-	if err != nil {
-		return true, err
-	}
-	
-	user_agent_string := fmt.Sprintf("username-checker by /u/%s",os.Getenv("REDDIT_USERNAME"))
-	req.Header.Set("User-Agent", user_agent_string)
-
-	response, err := client.Do(req)
+	redditURL := fmt.Sprintf("https://www.reddit.com/user/%s", username)
+	response, err := http.Get(redditURL)
 	if err != nil {
 		return true, err
 	}
 
 	defer response.Body.Close()
-	if response.StatusCode == 404 {
-		return false, nil
-	} else if response.StatusCode != http.StatusOK {
-		log.Printf("Error: received status code %d for user %s\n", response.StatusCode, username)
+	if response.StatusCode != http.StatusOK {
+		log.Fatalf("Error: received status code %d for user %s\n", response.StatusCode, username)
 		return false, errors.New("something went wrong while checking that username, try again in a bit")
 	}
-	return true, nil
+	webpage_content, err := io.ReadAll(response.Body)
+	if err != nil {
+		return true, err
+	}
+	webpage_string := string(webpage_content)
+	return !strings.Contains(webpage_string, "Sorry"), nil
 }
 
 func CheckIfXUserExists(username string) (bool, error) {
 	xURL := fmt.Sprintf("https://x.com/%s", username)
 
-	ctx, cancel := chromedp.NewContext(context.Background())
+	// Create context with cookie handling disabled
+	opts := append(chromedp.DefaultExecAllocatorOptions[:],
+		chromedp.Flag("disable-cookies", true),
+	)
+	
+	allocCtx, cancel := chromedp.NewExecAllocator(context.Background(), opts...)
+	defer cancel()
+
+	ctx, cancel := chromedp.NewContext(allocCtx)
 	defer cancel()
 
 	ctx, cancel = context.WithTimeout(ctx, 30*time.Second)
