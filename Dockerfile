@@ -22,6 +22,7 @@ FROM debian:bullseye-slim
 RUN apt-get update && \
     apt-get install -y \
       ca-certificates \
+      chromium \
       fonts-liberation \
       libappindicator3-1 \
       libasound2 \
@@ -59,6 +60,7 @@ RUN apt-get update && \
       xdg-utils \
       xvfb \
     && rm -rf /var/lib/apt/lists/*
+
 
 # Create non-root user
 RUN useradd -m appuser

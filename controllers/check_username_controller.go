@@ -71,6 +71,9 @@ func CheckIfRedditUserExists(username string) (bool, error) {
 	defer response.Body.Close()
 	if response.StatusCode == 404 {
 		return false, nil
+	} else if response.StatusCode != http.StatusOK {
+		log.Printf("Error: received status code %d for user %s\n", response.StatusCode, username)
+		return false, errors.New("something went wrong while checking that username, try again in a bit")
 	}
 	return true, nil
 }
@@ -101,7 +104,7 @@ func CheckIfXUserExists(username string) (bool, error) {
 	}
 	if strings.Contains(pageContent, "<title>Profile / X</title>") {
 		return false, nil
-	} 
+	}
 
 	return true, nil
 }
