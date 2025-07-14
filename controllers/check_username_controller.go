@@ -15,6 +15,8 @@ import (
 	"github.com/chromedp/chromedp"
 )
 
+var redditUsername = os.Getenv("REDDIT_USERNAME")
+
 func CheckIfInstagramUserExists(username string) (bool, error) {
 	instagramURL := fmt.Sprintf("https://www.instagram.com/%s/?hl=en", username)
 	response, err := http.Get(instagramURL)
@@ -52,23 +54,35 @@ func CheckIfGitHubUserExists(username string) (bool, error) {
 }
 
 func CheckIfRedditUserExists(username string) (bool, error) {
-	redditURL := fmt.Sprintf("https://www.reddit.com/user/%s", username)
-	response, err := http.Get(redditURL)
+	redditURL := fmt.Sprintf("https://www.reddit.com/user/%s/about.json", username)
+	req, err := http.NewRequest("GET", redditURL, nil)
 	if err != nil {
 		return true, err
 	}
 
-	defer response.Body.Close()
-	if response.StatusCode != http.StatusOK {
-		log.Printf("Error: received status code %d for user %s\n", response.StatusCode, username)
-		return false, errors.New("something went wrong while checking that username, try again in a bit")
-	}
-	webpage_content, err := io.ReadAll(response.Body)
+	req.Header.Set("User-Agent", fmt.Sprintf("username-checker/1.0 by u/%s", redditUsername))
+
+	response, err := http.DefaultClient.Do(req)
 	if err != nil {
 		return true, err
 	}
-	webpage_string := string(webpage_content)
-	return !strings.Contains(webpage_string, "Sorry"), nil
+	defer response.Body.Close()
+	
+	if response.StatusCode == 404 {
+		return false, nil
+	}
+	if response.StatusCode == http.StatusOK {
+		return true, nil
+	}
+
+	body, err := io.ReadAll(response.Body)
+	if err != nil {
+		log.Printf("Error reading response body: %v", err)
+		return true, err
+	}
+
+	log.Printf("Error: received status code %v for user %s, response: %s", response.StatusCode, username, string(body))
+	return true, errors.New("something went wrong while checking that username")
 }
 
 func CheckIfXUserExists(username string) (bool, error) {
