@@ -60,7 +60,7 @@ func CheckIfRedditUserExists(username string) (bool, error) {
 
 	defer response.Body.Close()
 	if response.StatusCode != http.StatusOK {
-		log.Fatalf("Error: received status code %d for user %s\n", response.StatusCode, username)
+		log.Printf("Error: received status code %d for user %s\n", response.StatusCode, username)
 		return false, errors.New("something went wrong while checking that username, try again in a bit")
 	}
 	webpage_content, err := io.ReadAll(response.Body)
@@ -78,7 +78,7 @@ func CheckIfXUserExists(username string) (bool, error) {
 	opts := append(chromedp.DefaultExecAllocatorOptions[:],
 		chromedp.Flag("disable-cookies", true),
 	)
-	
+
 	allocCtx, cancel := chromedp.NewExecAllocator(context.Background(), opts...)
 	defer cancel()
 
