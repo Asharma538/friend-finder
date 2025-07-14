@@ -76,7 +76,13 @@ func CheckIfRedditUserExists(username string) (bool, error) {
 		log.Printf("REDDIT | Error reading response body for user %s: %v\n", username, err)
 		return true, err
 	}
-	return string(body) == "false", nil
+	if string(body) == "false"{
+		return true, nil
+	} else if string(body) == "true" {
+		return false, nil
+	}
+	log.Printf("REDDIT | Unexpected response for user %s: %s\n", username, body)
+	return true, errors.New("unexpected response from Reddit API")
 }
 
 func CheckIfXUserExists(username string) (bool, error) {
